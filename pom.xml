@@ -13,6 +13,8 @@
         <module>config-server</module>
         <module>eureka-server</module>
         <module>book-service</module>
+        <module>author-service</module>
+        <module>author-service</module>
     </modules>
 
     <properties>
