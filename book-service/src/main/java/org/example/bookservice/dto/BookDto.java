@@ -1,36 +1,15 @@
-package org.example.bookservice.model;
+package org.example.bookservice.dto;
 
-import javax.persistence.*;
 import java.util.Set;
 
-@Entity
-public class Book {
+public class BookDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String title;
     private String isbn;
     private String description;
     private Double price;
-
-    @ElementCollection
-    @CollectionTable(name = "book_author_ids", joinColumns = @JoinColumn(name = "book_id"))
-    @Column(name = "author_id")
-    private Set<Long> authorIds;
-
-    public Book() {
-    }
-
-    public Book(Long id, String title, String isbn, String description, Double price, Set<Long> authorIds) {
-        this.id = id;
-        this.title = title;
-        this.isbn = isbn;
-        this.description = description;
-        this.price = price;
-        this.authorIds = authorIds;
-    }
+    private Set<AuthorDto> authors;
 
     public Long getId() {
         return id;
@@ -72,11 +51,11 @@ public class Book {
         this.price = price;
     }
 
-    public Set<Long> getAuthorIds() {
-        return authorIds;
+    public Set<AuthorDto> getAuthors() {
+        return authors;
     }
 
-    public void setAuthorIds(Set<Long> authorIds) {
-        this.authorIds = authorIds;
+    public void setAuthors(Set<AuthorDto> authors) {
+        this.authors = authors;
     }
 }

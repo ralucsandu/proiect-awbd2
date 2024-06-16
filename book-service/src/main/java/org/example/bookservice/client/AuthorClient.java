@@ -1,4 +1,4 @@
-package org.example.bookservice.feign;
+package org.example.bookservice.client;
 
 import org.example.bookservice.dto.AuthorDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "author-service") // name should match the spring.application.name of author-service
-public interface AuthorFeignClient {
+@FeignClient(name = "author-service")
+public interface AuthorClient {
 
     @GetMapping("/authors")
     List<AuthorDto> getAllAuthors();
