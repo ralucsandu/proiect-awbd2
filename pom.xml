@@ -14,7 +14,7 @@
         <module>eureka-server</module>
         <module>book-service</module>
         <module>author-service</module>
-        <module>author-service</module>
+        <module>gateway</module>
     </modules>
 
     <properties>
@@ -32,6 +32,10 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-loadbalancer</artifactId>
             </dependency>
         </dependencies>
     </dependencyManagement>
