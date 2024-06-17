@@ -3,9 +3,12 @@ package org.example.bookservice.controller;
 import org.example.bookservice.client.AuthorClient;
 import org.example.bookservice.dto.AuthorDto;
 import org.example.bookservice.dto.BookDto;
+import org.example.bookservice.exception.BookNotFoundException;
 import org.example.bookservice.model.Book;
 import org.example.bookservice.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,13 +35,12 @@ public class BookController {
     @GetMapping("/{id}")
     public BookDto getBookById(@PathVariable Long id) {
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + id));
         return convertToBookDto(book);
     }
 
     @PostMapping
     public Book createBook(@RequestBody BookDto bookDto) {
-        // Validate authors exist and get their IDs
         Set<AuthorDto> authors = bookDto.getAuthors();
         Set<Long> authorIds = authors.stream()
                 .map(AuthorDto::getId)
@@ -52,7 +54,6 @@ public class BookController {
             throw new RuntimeException("Some authors not found");
         }
 
-        // Create book entity
         Book book = new Book();
         book.setTitle(bookDto.getTitle());
         book.setIsbn(bookDto.getIsbn());
@@ -76,4 +77,10 @@ public class BookController {
         bookDto.setAuthors(authors);
         return bookDto;
     }
+
+    @ExceptionHandler(BookNotFoundException.class)
+    public ResponseEntity<Object> handleBookNotFoundException(BookNotFoundException ex) {
+        return new ResponseEntity<>("Book not found", HttpStatus.NOT_FOUND);
+    }
+
 }
