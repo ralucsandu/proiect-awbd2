@@ -1,16 +1,19 @@
 package org.example.bookservice.controller;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.example.bookservice.client.AuthorClient;
 import org.example.bookservice.dto.AuthorDto;
 import org.example.bookservice.dto.BookDto;
 import org.example.bookservice.exception.BookNotFoundException;
 import org.example.bookservice.model.Book;
 import org.example.bookservice.repository.BookRepository;
+import org.example.bookservice.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,39 +23,28 @@ import java.util.stream.Collectors;
 public class BookController {
 
     @Autowired
-    private BookRepository bookRepository;
+    private BookService bookService;
 
     @Autowired
     private AuthorClient authorClient;
 
     @GetMapping
     public List<BookDto> getAllBooks() {
-        return bookRepository.findAll().stream()
-                .map(this::convertToBookDto)
-                .collect(Collectors.toList());
+        return bookService.getAllBooks();
     }
 
     @GetMapping("/{id}")
-    public BookDto getBookById(@PathVariable Long id) {
-        Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + id));
-        return convertToBookDto(book);
+    public ResponseEntity<BookDto> getBookWithAuthors(@PathVariable Long id) {
+        BookDto bookDto = bookService.getBookWithAuthors(id);
+        return ResponseEntity.ok(bookDto);
     }
 
     @PostMapping
-    public Book createBook(@RequestBody BookDto bookDto) {
+    public ResponseEntity<Book> createBook(@RequestBody BookDto bookDto) {
         Set<AuthorDto> authors = bookDto.getAuthors();
         Set<Long> authorIds = authors.stream()
                 .map(AuthorDto::getId)
                 .collect(Collectors.toSet());
-
-        List<AuthorDto> validatedAuthors = authorIds.stream()
-                .map(authorClient::getAuthorById)
-                .collect(Collectors.toList());
-
-        if (validatedAuthors.size() != authorIds.size()) {
-            throw new RuntimeException("Some authors not found");
-        }
 
         Book book = new Book();
         book.setTitle(bookDto.getTitle());
@@ -60,27 +52,14 @@ public class BookController {
         book.setDescription(bookDto.getDescription());
         book.setPrice(bookDto.getPrice());
         book.setAuthorIds(authorIds);
-        return bookRepository.save(book);
-    }
 
-    private BookDto convertToBookDto(Book book) {
-        Set<AuthorDto> authors = book.getAuthorIds().stream()
-                .map(authorClient::getAuthorById)
-                .collect(Collectors.toSet());
+        Book createdBook = bookService.createBook(book);
 
-        BookDto bookDto = new BookDto();
-        bookDto.setId(book.getId());
-        bookDto.setTitle(book.getTitle());
-        bookDto.setIsbn(book.getIsbn());
-        bookDto.setDescription(book.getDescription());
-        bookDto.setPrice(book.getPrice());
-        bookDto.setAuthors(authors);
-        return bookDto;
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
     }
 
     @ExceptionHandler(BookNotFoundException.class)
     public ResponseEntity<Object> handleBookNotFoundException(BookNotFoundException ex) {
         return new ResponseEntity<>("Book not found", HttpStatus.NOT_FOUND);
     }
-
 }
