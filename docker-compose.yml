@@ -1,0 +1,41 @@
+version: '3.9'  # Update to the latest version
+
+services:
+  author-service:
+    image: author-service:latest
+    container_name: author-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - wait-for-config-server
+
+  book-service:
+    image: book-service:latest
+    container_name: book-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - author-service
+      - wait-for-config-server
+
+  gateway:
+    image: gateway:latest
+    container_name: gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - author-service
+      - book-service
+      - wait-for-config-server
+
+  wait-for-config-server:
+    image: busybox:1.31.0
+    container_name: wait-for-config-server
+    entrypoint: ['sh', '-c', 'while ! nc -z config-server 8888; do sleep 1; done; echo Config Server is up']
+    depends_on:
+      - wait-for-eureka-server
+
+  wait-for-eureka-server:
+    image: busybox:1.31.0
+    container_name: wait-for-eureka-server
+    entrypoint: ['sh', '-c', 'while ! nc -z eureka-server 8761; do sleep 1; done; echo Eureka Server is up']

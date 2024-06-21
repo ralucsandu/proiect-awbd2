@@ -16,7 +16,6 @@
         <module>author-service</module>
         <module>gateway</module>
         <module>zipkin-server</module>
-        <module>zipkin-server</module>
     </modules>
 
     <properties>
