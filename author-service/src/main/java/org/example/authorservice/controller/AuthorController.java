@@ -1,5 +1,7 @@
 package org.example.authorservice.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.authorservice.exception.AuthorNotFoundException;
 import org.example.authorservice.model.Author;
 import org.example.authorservice.repository.AuthorRepository;
@@ -15,7 +17,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+@Tag(name = "Author", description = "Author management APIs")
 @RestController
 @RequestMapping("/authors")
 public class AuthorController {
@@ -23,6 +25,7 @@ public class AuthorController {
     @Autowired
     private AuthorRepository authorRepository;
 
+    @Operation(summary = "Get all authors")
     @GetMapping
     public List<EntityModel<Author>> getAllAuthors() {
         List<Author> authors = authorRepository.findAll();
@@ -37,7 +40,7 @@ public class AuthorController {
                 .collect(Collectors.toList());
     }
 
-
+    @Operation(summary = "Get author by id")
     @GetMapping("/{id}")
     public EntityModel<Author> getAuthorById(@PathVariable Long id) {
         Author author = authorRepository.findById(id)
@@ -51,7 +54,7 @@ public class AuthorController {
                 Link.of(wikipediaUrl).withRel("wikipedia"));
     }
 
-
+    @Operation(summary = "Add a new author")
     @PostMapping
     public ResponseEntity<EntityModel<Author>> createAuthor(@RequestBody Author author) {
         Author createdAuthor = authorRepository.save(author);

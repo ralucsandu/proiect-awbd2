@@ -1,6 +1,8 @@
 package org.example.bookservice.controller;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.bookservice.client.AuthorClient;
 import org.example.bookservice.dto.AuthorDto;
 import org.example.bookservice.dto.BookDto;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+@Tag(name = "Book", description = "Book management APIs")
 @RestController
 @RequestMapping("/books")
 public class BookController {
@@ -30,6 +33,7 @@ public class BookController {
     @Autowired
     private BookService bookService;
 
+    @Operation(summary = "Get all books")
     @GetMapping
     public List<EntityModel<BookDto>> getAllBooks() {
         List<BookDto> books = bookService.getAllBooks();
@@ -40,6 +44,7 @@ public class BookController {
                 .collect(Collectors.toList());
     }
 
+    @Operation(summary = "Get book by id")
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<BookDto>> getBookWithAuthors(@PathVariable Long id) {
         BookDto bookDto = bookService.getBookWithAuthors(id);
@@ -48,7 +53,7 @@ public class BookController {
                 linkTo(methodOn(BookController.class).getAllBooks()).withRel("books"));
         return ResponseEntity.ok(bookResource);
     }
-
+    @Operation(summary = "Add a new book")
     @PostMapping
     public ResponseEntity<EntityModel<Book>> createBook(@RequestBody BookDto bookDto) {
         Set<AuthorDto> authors = bookDto.getAuthors();
