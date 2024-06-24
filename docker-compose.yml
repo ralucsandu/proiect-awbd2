@@ -1,4 +1,4 @@
-version: '3.9'  # Update to the latest version
+version: '3.9'
 
 services:
   author-service:
